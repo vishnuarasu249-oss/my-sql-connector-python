@@ -1,0 +1,127 @@
+import mysql.connector
+
+# ---------- Database Connection ----------
+def get_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="your_mysql_password",
+        database="student_db"
+    )
+
+# ---------- CREATE ----------
+def add_student():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    name = input("Enter Name: ")
+    department = input("Enter Department: ")
+    email = input("Enter Email: ")
+    phone = input("Enter Phone: ")
+
+    sql = "INSERT INTO students (name, department, email, phone) VALUES (%s, %s, %s, %s)"
+    values = (name, department, email, phone)
+
+    cursor.execute(sql, values)
+    conn.commit()
+
+    print("✅ Student Added Successfully")
+
+    cursor.close()
+    conn.close()
+
+# ---------- READ ----------
+def view_students():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM students")
+    records = cursor.fetchall()
+
+    print("\n--- Student Records ---")
+    print("ID | Name | Department | Email | Phone")
+    print("-" * 60)
+
+    for row in records:
+        print(row)
+
+    cursor.close()
+    conn.close()
+
+# ---------- UPDATE ----------
+def update_student():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    student_id = int(input("Enter Student ID to Update: "))
+    name = input("Enter New Name: ")
+    department = input("Enter New Department: ")
+    email = input("Enter New Email: ")
+    phone = input("Enter New Phone: ")
+
+    sql = """
+    UPDATE students
+    SET name=%s, department=%s, email=%s, phone=%s
+    WHERE student_id=%s
+    """
+
+    values = (name, department, email, phone, student_id)
+    cursor.execute(sql, values)
+    conn.commit()
+
+    if cursor.rowcount > 0:
+        print("✅ Student Updated Successfully")
+    else:
+        print("❌ Student ID Not Found")
+
+    cursor.close()
+    conn.close()
+
+# ---------- DELETE ----------
+def delete_student():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    student_id = int(input("Enter Student ID to Delete: "))
+
+    sql = "DELETE FROM students WHERE student_id=%s"
+    cursor.execute(sql, (student_id,))
+    conn.commit()
+
+    if cursor.rowcount > 0:
+        print("✅ Student Deleted Successfully")
+    else:
+        print("❌ Student ID Not Found")
+
+    cursor.close()
+    conn.close()
+
+# ---------- MENU ----------
+def menu():
+    while True:
+        print("\n====== STUDENT DATABASE MENU ======")
+        print("1. Add Student")
+        print("2. View Students")
+        print("3. Update Student")
+        print("4. Delete Student")
+        print("5. Exit")
+
+        choice = input("Enter your choice (1-5): ")
+
+        if choice == "1":
+            add_student()
+        elif choice == "2":
+            view_students()
+        elif choice == "3":
+            update_student()
+        elif choice == "4":
+            delete_student()
+        elif choice == "5":
+            print("🚪 Exiting Program...")
+            break
+        else:
+            print("❌ Invalid Choice. Try Again.")
+
+# ---------- MAIN ----------
+if __name__ == "__main__":
+    menu()
